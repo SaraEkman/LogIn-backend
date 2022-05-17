@@ -19,10 +19,8 @@ app.use(cors());
 
 
 app.get('/', function (req, res, next) {
-    res.send("<h1>lfkdsjkf</h1>");
+    res.send("<h1>Välkommen</h1>");
 });
-
-
 
 
 app.get('/users', (req, res) => {
@@ -74,14 +72,15 @@ app.post('/logIn', (req, res) => {
         let users = JSON.parse(data);
 
         let foundUser = users.find(user => {
-            return user.userName === req.body.userName && user.passWord === req.body.passWord;
+            return user.userName === req.body.userName 
         });
         console.log(foundUser);
 
         if (foundUser) {
             return res.json({
                 'mes': 'ok',
-                'userId': foundUser.userId
+                'userId': foundUser.userId,
+                'userName': foundUser.userName
             });
         } else {
             return res.json({
@@ -90,6 +89,7 @@ app.post('/logIn', (req, res) => {
         }
     });
 });
+
 app.post('/createUser', (req, res) => {
     console.log(req.body.userName, req.body.passWord);
 
@@ -99,8 +99,11 @@ app.post('/createUser', (req, res) => {
         }
         let users = JSON.parse(data);
 
+        const originalPass = CryptoJs.AES.decrypt(req.body.passWord, "passWord").toString(CryptoJs.enc.Utf8);
+        console.log(originalPass);
+
         let foundUser = users.find(user => {
-            return user.userName === req.body.userName && user.passWord === req.body.passWord;
+            return user.userName === req.body.userName && user.passWord === originalPass
         });
         console.log(foundUser);
 
@@ -110,8 +113,10 @@ app.post('/createUser', (req, res) => {
             });
         }
         else {
+            const krypteratPass = CryptoJs.AES.encrypt(req.body.passWord, "passWord").toString();
+            console.log(krypteratPass);
             let newUser = {
-                "userId": nanoId.nanoid(8), "userName": req.body.userName, "passWord": req.body.passWord
+                "userId": nanoId.nanoid(8), "userName": req.body.userName, "passWord": krypteratPass 
             };
             // CryptoJs.AES.encrypt(req.body.passWord, "PassWord").toString()
             console.log(newUser);
@@ -125,40 +130,5 @@ app.post('/createUser', (req, res) => {
         }
     });
 });
-
-// app.get('/logIn', (req, res) => {
-//     res.send(`<input type="text" name="name">
-//     <button type="submit">Spara</button>`);
-// });
-
-// app.post('/logIn', (res, req) => {
-//     let users;
-//     if (fs.existsSync("users.json")) {
-//         users = JSON.parse(fs.readFileSync("users.json"));
-//     }
-//     users = [...users, req.body];
-
-//     console.log(users);
-//     console.log(req.body);
-//     res.json(true);
-
-
-// fs.readFile('users.json', (err, data) => {
-//     if (err) {
-//         console.log('error' + err);
-//     }
-//     let users = JSON.parse(data);
-// let foundUser = users.find((user) => {
-//     return user.userName === req.body.userName
-// });
-// if (foundUser) {
-//     foundUser.isLoggedIn = true;
-//     return res.send("You are now logged in");
-// }
-//     console.log(users);
-// });
-//    res.send('ok')
-// });
-
 
 module.exports = app;
